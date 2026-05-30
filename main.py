@@ -22,6 +22,7 @@ app = Flask(__name__)
 MESSAGES = {
     "already_has": "\u4f60\u5df2\u7d93\u6709 {role}",
     "added": "\u5df2\u7d66\u4e88 {role}",
+    "removed": "\u5df2\u79fb\u9664 {role}",
     "no_role": "\u76ee\u524d\u6c92\u6709\u53ef\u9078\u7684\u8eab\u5206\u7d44",
     "role_not_found": "\u627e\u4e0d\u5230\u8eab\u5206\u7d44",
     "guild_not_found": "\u627e\u4e0d\u5230\u9019\u500b\u4f3a\u670d\u5668\uff0c\u8acb\u78ba\u8a8d Bot \u5df2\u52a0\u5165\u4f3a\u670d\u5668\u3002",
@@ -44,7 +45,8 @@ def get_selectable_roles(guild):
 
 async def give_role(member, selected_role):
     if selected_role in member.roles:
-        return MESSAGES["already_has"].format(role=selected_role.name)
+        await member.remove_roles(selected_role)
+        return MESSAGES["removed"].format(role=selected_role.name)
 
     await member.add_roles(selected_role)
     return MESSAGES["added"].format(role=selected_role.name)
