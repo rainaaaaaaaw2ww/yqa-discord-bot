@@ -93,6 +93,25 @@ def create_role_view(guild, role_ids):
     return view
 
 
+def register_persistent_role_buttons():
+    registered = 0
+
+    for guild in bot.guilds:
+        roles = get_selectable_roles(guild)
+
+        for start in range(0, len(roles), 25):
+            view = View(timeout=None)
+
+            for role in roles[start:start + 25]:
+                view.add_item(RoleButton(role))
+                registered += 1
+
+            if view.children:
+                bot.add_view(view)
+
+    print(f"Registered {registered} persistent role buttons")
+
+
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html", guilds=bot.guilds, channels=[])
@@ -182,6 +201,10 @@ async def on_ready():
     for guild in bot.guilds:
         print(f"Guild: {guild.name} / ID: {guild.id}")
 
+    if not getattr(bot, "persistent_buttons_registered", False):
+        bot.persistent_buttons_registered = True
+        register_persistent_role_buttons()
+
     if not getattr(bot, "web_started", False):
         bot.web_started = True
         threading.Thread(target=run_web, daemon=True).start()
@@ -191,4 +214,3 @@ if not TOKEN:
     raise RuntimeError("TOKEN is missing in .env")
 
 bot.run(TOKEN)
-
